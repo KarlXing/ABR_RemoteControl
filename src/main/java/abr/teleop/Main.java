@@ -43,21 +43,13 @@ public class Main extends Activity {
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-	    getWindow().setFormat(PixelFormat.RGBA_8888);
+	    getWindow().setFormat(PixelFormat.RGBA_8888);  //setting for the background picture
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN 
         		| WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); 
-		overridePendingTransition(0, 0);
+		overridePendingTransition(0, 0);  // no animation
         setContentView(R.layout.main);
-        btnController = (Button)findViewById(R.id.btnController);
-        btnController.setVisibility(View.INVISIBLE);
-        btnController.setOnClickListener(new OnClickListener() {
-        	public void onClick(View v) {
-        		Intent intent = new Intent(Main.this, ControllerConnection.class);
-        		startActivity(intent);
-        	}
-        });
 
         btnIOIO = (Button)findViewById(R.id.btnIOIO);
 		btnIOIO.setVisibility(View.INVISIBLE);

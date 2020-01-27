@@ -13,11 +13,4 @@
         android:layout_gravity="bottom"
         android:background="@drawable/button_mode_ioio" />
 
-    <Button
-        android:id="@+id/btnController"
-        android:layout_width="@dimen/button_menu_width"
-        android:layout_height="@dimen/button_menu_height"
-        android:layout_gravity="top"
-        android:background="@drawable/button_mode_control" />
-    
 </LinearLayout>

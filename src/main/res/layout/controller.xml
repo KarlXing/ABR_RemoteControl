@@ -10,6 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <TextView
+        android:id="@+id/colors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="colors"
+        android:textColor="@color/common_plus_signin_btn_text_dark_default"
+        android:textColorLink="@color/common_plus_signin_btn_text_dark_focused" />
+
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="wrap_content"
@@ -18,6 +26,51 @@
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/command_button_layout_margin"
         android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/position"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="0,0" />
+
+        <Button
+            android:id="@+id/check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="check" />
+
+        <Button
+            android:id="@+id/dstep"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/command_button_margin"
+            android:layout_weight="1"
+            android:text="Dstep" />
+
+        <Button
+            android:id="@+id/debug"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/command_button_margin"
+            android:text="Debug" />
+
+        <Button
+            android:id="@+id/button_run"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/command_button_margin"
+            android:text="RUN" />
+
+        <Button
+            android:id="@+id/button_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/command_button_margin"
+            android:text="SOTP" />
 
         <CheckBox
             android:id="@+id/cbLog"
@@ -57,11 +110,11 @@
         android:layout_height="@dimen/controller_size"
         android:layout_above="@+id/linearLayout1"
         android:layout_alignParentLeft="true"
-        android:layout_margin="@dimen/controller_margin"
-        android:layout_marginBottom="15dp"
         android:layout_marginLeft="30dp"
-        android:background="@drawable/image_button_bg" >
-    </RelativeLayout>
+        android:layout_marginTop="@dimen/controller_margin"
+        android:layout_marginRight="@dimen/controller_margin"
+        android:layout_marginBottom="160dp"
+        android:background="@drawable/image_button"></RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/layout_joystick2"
@@ -69,9 +122,10 @@
         android:layout_height="@dimen/controller_size"
         android:layout_above="@+id/linearLayout1"
         android:layout_alignRight="@+id/linearLayout1"
-        android:layout_margin="@dimen/controller_margin"
-        android:layout_marginBottom="38dp"
-        android:background="@drawable/image_button_bg" >
-    </RelativeLayout>
+        android:layout_marginLeft="@dimen/controller_margin"
+        android:layout_marginTop="@dimen/controller_margin"
+        android:layout_marginRight="30dp"
+        android:layout_marginBottom="160dp"
+        android:background="@drawable/image_button"></RelativeLayout>
 
 </RelativeLayout>

@@ -1,5 +1,6 @@
 package abr.teleop;
 
+import ioio.lib.api.PulseInput;
 import ioio.lib.api.PwmOutput;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
@@ -17,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -65,6 +67,17 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.core.Size;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.MatOfPoint;
+
+import org.w3c.dom.Text;
+
 public class IOIO extends IOIOActivity implements Callback, SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, PreviewCallback, PictureCallback{
 	private static final String TAG_IOIO = "CameraRobot-IOIO";
 	private static final String TAG_CAMERA = "CameraRobot-Camera";
@@ -85,13 +98,14 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 	static final int DEFAULT_PWM = 1500, MAX_PWM = 2000, MIN_PWM = 1000, PWM_STEP=10, K1 = 3, K2=1, K3=10;
 
 	RelativeLayout layoutPreview;
-	TextView txtspeed_motor, txtIP;
+	TextView txtspeed_motor, txtIP, sonarView;
 	Button buttonUp, buttonUpLeft, buttonUpRight, buttonDown
 			, buttonDownLeft, buttonDownRight, buttonRight, buttonLeft;
 
 	int speed_motor = 0;
 	int pwm_pan, pwm_tilt;
 	int pwm_speed, pwm_steering;
+	float sonar_dis1, sonar_dis2, sonar_dis3;
 	
 	Camera mCamera;
 	Camera.Parameters params;
@@ -125,6 +139,8 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 	File recordingFile;
 	FileOutputStream fosRR;
 	Boolean logging;
+	int logging_interval = 20;
+	int logging_time = 0;
 
 	//location variables
 	private GoogleApiClient mGoogleApiClient;
@@ -164,6 +180,8 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
         
 		txtIP = (TextView)findViewById(R.id.txtIP);
 		txtIP.setText(getIP());
+
+		sonarView = (TextView) findViewById(R.id.sonarView);
 
 		mPreview = (SurfaceView)findViewById(R.id.preview);
         mPreview.getHolder().addCallback(this);
@@ -293,7 +311,7 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 		if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
 			mGeo = event.values;
 		if (mAcc != null && mGeo != null) {
-			Log.i(TAG_IOIO,"mAcc mGeo not null");
+//			Log.i(TAG_IOIO,"mAcc mGeo not null");
 			float[] temp = new float[9];
 			float[] R = new float[9];
 			//Load rotation matrix into R
@@ -311,8 +329,9 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 			//Update the compass direction
 			heading = values[0]+12;
 			heading = (heading*5 + fixWraparound(values[0]+12))/6; //add 12 to make up for declination in Irvine, average out from previous 2 for smoothness
-			Log.i(TAG_IOIO,"heading:"+heading);
+//			Log.i(TAG_IOIO,"heading:"+heading);
 		}
+		sonarView.setText(sonar_dis1 + "," + sonar_dis2 + "," +sonar_dis3);
 	}
 
 	//Called whenever activity resumes from pause
@@ -339,7 +358,7 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 					dos = new DataOutputStream(out);
 					connect_state = true;
 					sendString("ACCEPT");
-					Log.i(TAG_IOIO, "Connect");
+//					Log.i(TAG_IOIO, "Connect");
 				} catch (IOException e) {
 					Log.e(TAG_IOIO, e.toString());
 				} 
@@ -453,6 +472,9 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 			} else if(command == IOIOService.MESSAGE_SNAP) {
 		    	if((int)(System.currentTimeMillis() / 1000) - startTime > 1) {
 			    	Log.d(TAG_CAMERA,"Snap");
+					Toast.makeText(getApplicationContext()
+							, "Take Picture"
+							, Toast.LENGTH_SHORT).show();
 			    	startTime = (int) (System.currentTimeMillis() / 1000);
 	    	        mCamera.takePicture(null, null, null, IOIO.this);
 		    	}
@@ -463,14 +485,16 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 			{
 				pwm_speed = msg.arg1;
 				pwm_steering = msg.arg2;
+//				Toast.makeText(getApplicationContext(), "Received Setting"+pwm_speed+pwm_steering, Toast.LENGTH_SHORT).show();
 				
 				Log.e("IOIO", "pwm_speed: " + pwm_speed + " pwm_steering: " + pwm_steering);
+				txtspeed_motor.setText("speed_motor " + String.valueOf(pwm_speed)+","+String.valueOf(pwm_steering));
 			} 
 			else if(command == IOIOService.MESSAGE_STOP) 
 			{				
 				pwm_speed = 1500;
 				pwm_steering = 1500;
-				txtspeed_motor.setText("speed_motor " + String.valueOf(pwm_speed));
+				txtspeed_motor.setText("speed_motor " + String.valueOf(pwm_speed)+","+String.valueOf(pwm_steering));
 			} 
 			else if(command == IOIOService.MESSAGE_PT_MOVE) 
 			{
@@ -611,7 +635,7 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
             output = new File(imagesFolder, fileName);
         }
         
-    	Log.i(TAG_CAMERA,output.toString());
+//    	Log.i(TAG_CAMERA,output.toString());
     	
     	try {
             FileOutputStream fos = new FileOutputStream(output);
@@ -631,6 +655,7 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 	}
 	
 	public void onPreviewFrame(final byte[] arg0, Camera arg1) {
+		txtspeed_motor.setText("speed_motor " + String.valueOf(pwm_speed)+","+String.valueOf(pwm_steering));
 		if (!initialed) {
 			w = mCamera.getParameters().getPreviewSize().width;
 			h = mCamera.getParameters().getPreviewSize().height;
@@ -643,7 +668,7 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 				decodeYUV420(rgbs, arg0, w, h);
 				bitmap = Bitmap.createBitmap(rgbs, w, h, Config.ARGB_8888);
 				bos = new ByteArrayOutputStream();
-				bitmap.compress(CompressFormat.JPEG, 75, bos);
+				bitmap.compress(CompressFormat.JPEG, 100, bos);
 				sendImage(bos.toByteArray());
 			} catch (OutOfMemoryError e) {
 				Toast.makeText(getApplicationContext()
@@ -654,7 +679,8 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 			}
 		}
 
-		if(logging) {
+		if(logging && logging_time%logging_interval == 0) {
+			logging_time = (logging_time + 1) % logging_interval;
 			String mill_timestamp = System.currentTimeMillis()+"";
 			String info = mill_timestamp + "," + curr_loc.getLatitude() + "," + curr_loc.getLongitude() + ","
 					+ mAcc[0] + "," + mAcc[1] + "," + mAcc[2] + ","
@@ -800,9 +826,20 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 
 	}
 
+	public int getDirec(Mat image) {
+		// single channel image
+		assert(image.channels() == 1);
+		int width = image.width();
+		int height = image.height();
+		return 0;
+	}
+
+
 	class Looper extends BaseIOIOLooper 
 	{
 		PwmOutput speed, steering, pan, tilt;
+		PulseInput sonar1,sonar2,sonar3;
+
 //		int pwm_left_motor, pwm_right_motor;
 
     	
@@ -811,7 +848,7 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
         	pwm_speed = DEFAULT_PWM;
         	pwm_steering = DEFAULT_PWM;
         	pwm_pan = DEFAULT_PWM;
-        	pwm_tilt = 1800;
+        	pwm_tilt = 1500;
 
         	speed = ioio_.openPwmOutput(3, 50);        	
         	steering = ioio_.openPwmOutput(4, 50);        	
@@ -822,6 +859,10 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
         	steering.setPulseWidth(pwm_steering);
         	pan.setPulseWidth(pwm_pan);
         	tilt.setPulseWidth(pwm_tilt);
+
+			sonar1 = ioio_.openPulseInput(12, PulseInput.PulseMode.POSITIVE);
+			sonar2 = ioio_.openPulseInput(13, PulseInput.PulseMode.POSITIVE);
+			sonar3 = ioio_.openPulseInput(14, PulseInput.PulseMode.POSITIVE);
         	
         	runOnUiThread(new Runnable() {
 				public void run() {
@@ -852,7 +893,14 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
         	pan.setPulseWidth(pwm_pan);
         	tilt.setPulseWidth(pwm_tilt);
 
-			Thread.sleep(20);
+			float reading = sonar1.getDuration();
+			sonar_dis1 = (float) (reading*1000.0*1000.0/147.0);
+
+			reading = sonar2.getDuration();
+			sonar_dis2 = (float) (reading*1000.0*1000.0/147.0);
+
+			reading = sonar3.getDuration();
+			sonar_dis3 = (float) (reading*1000.0*1000.0/147.0);
         }
         
 		public void disconnected() {

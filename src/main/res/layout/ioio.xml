@@ -16,9 +16,17 @@
         android:orientation="vertical" >
 
         <TextView
+            android:id="@+id/sonarView"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="1000,1000,1000"
+            android:textColor="#ca2559"
+            android:textSize="@dimen/data_text_size" />
+
+        <TextView
             android:id="@+id/txtIP"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:text="0.0.0.0"
             android:textColor="#ca2559"
             android:textSize="@dimen/data_text_size" />
@@ -32,7 +40,7 @@
 	        android:textSize="@dimen/data_text_size" />
  
         <ImageView
-            android:id="@+id/imagePreview"
+            android:id="@+id/imagePreview1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 	</LinearLayout>

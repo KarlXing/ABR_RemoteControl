@@ -177,7 +177,13 @@ public class IOIOService extends AsyncTask<Void, Void, Void> {
 					mHandler.obtainMessage(MESSAGE_LOG, data).sendToTarget();
 				} else if(data.equals("Focus")) {
 					mHandler.obtainMessage(MESSAGE_FOCUS).sendToTarget();
-				} 
+				} else if(data.substring(0, 2).equals("MC") && (size == 12)) {
+					Log.i("UDP MC",data);
+					String[] array = data.split("/");
+					int speed = Integer.parseInt(array[1]);
+					int steering = Integer.parseInt(array[2]);
+					mHandler.obtainMessage(MESSAGE_MOVE, speed, steering).sendToTarget();
+				}
 			} catch (EOFException e) { 
 				Log.w(TAG, e.toString());
 				mHandler.obtainMessage(MESSAGE_CLOSE).sendToTarget();

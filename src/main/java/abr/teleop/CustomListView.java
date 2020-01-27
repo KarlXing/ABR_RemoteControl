@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 public class CustomListView extends ArrayAdapter<String> {
 	ArrayList<String> str; 
-	LayoutInflater inflater;
+	LayoutInflater inflater;  //used to find xml file
 	int id;
     String[] items ;
     

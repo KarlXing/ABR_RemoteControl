@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -12,13 +14,28 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
+import org.opencv.core.Mat;
+import org.opencv.core.CvType;
+
+import java.io.File;
+
 public class ControllerConnection extends Activity {
 	EditText etxtIP, etxtPass;
 	Button buttonConnect;
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+//		File jpgFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
+//		if (!jpgFile.exists()) {
+//			jpgFile.mkdirs();
+//		}
+//		String[] files = jpgFile.list();
+//		for (String file : files)
+//		{
+//			Log.i("file",file);
+//		}
+
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); 
 		setContentView(R.layout.controller_connection);
